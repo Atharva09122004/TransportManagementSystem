@@ -3,6 +3,15 @@
 require_once 'config.php';
 
 try {
+    // Users table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        dob TEXT,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
+    )");
+
     // Vehicles table
     $pdo->exec("CREATE TABLE IF NOT EXISTS vehicles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
