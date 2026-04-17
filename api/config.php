@@ -1,12 +1,18 @@
 <?php
 // api/config.php
 
-// Define absolute path to SQLite DB file
-$dbPath = __DIR__ . '/transport.sqlite';
+// Define database connection parameters for MySQL
+$host = '127.0.0.1';
+$db   = 'transport_db';
+$user = 'root'; // default XAMPP user
+$pass = '';     // default XAMPP password
+$charset = 'utf8mb4';
+
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 
 try {
-    // Create or connect to SQLite database
-    $pdo = new PDO('sqlite:' . $dbPath);
+    // Connect to MySQL database
+    $pdo = new PDO($dsn, $user, $pass);
     // Set errormode to exceptions
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     // Tell PDO to return result sets as associative arrays
