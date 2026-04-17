@@ -17,8 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt = $pdo->query("SELECT COUNT(*) FROM drivers WHERE status = 'Available'");
     $stats['available_drivers'] = $stmt->fetchColumn();
     
-    $stmt = $pdo->query("SELECT COUNT(*) FROM trips WHERE status = 'Scheduled' OR status = 'In Progress'");
-    $stats['active_trips'] = $stmt->fetchColumn();
+    $stmt = $pdo->query("SELECT COUNT(*) FROM trips WHERE status = 'Scheduled'");
+    $stats['scheduled_trips'] = $stmt->fetchColumn();
+
+    $stmt = $pdo->query("SELECT COUNT(*) FROM trips WHERE status = 'In Transit'");
+    $stats['in_transit_trips'] = $stmt->fetchColumn();
+
+    $stmt = $pdo->query("SELECT COUNT(*) FROM trips WHERE status = 'Completed'");
+    $stats['completed_trips'] = $stmt->fetchColumn();
+
+    $stmt = $pdo->query("SELECT COUNT(*) FROM trips WHERE status = 'Cancelled'");
+    $stats['cancelled_trips'] = $stmt->fetchColumn();
 
     // Recent trips for widget
     $stmt = $pdo->query("SELECT trips.id, trips.destination, trips.status, vehicles.license_plate, drivers.name as driver_name 

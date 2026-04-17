@@ -33,6 +33,21 @@ switch ($method) {
         }
         break;
 
+    case 'PUT':
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (isset($data['id'], $data['status'])) {
+            try {
+                $stmt = $pdo->prepare("UPDATE trips SET status = ? WHERE id = ?");
+                $stmt->execute([$data['status'], $data['id']]);
+                sendJsonResponse(["status" => "success", "message" => "Trip status updated"]);
+            } catch (PDOException $e) {
+                sendJsonResponse(["status" => "error", "message" => "Error updating trip: " . $e->getMessage()], 400);
+            }
+        } else {
+            sendJsonResponse(["status" => "error", "message" => "Missing required fields"], 400);
+        }
+        break;
+
     case 'DELETE':
         $data = json_decode(file_get_contents('php://input'), true);
         if (isset($data['id'])) {

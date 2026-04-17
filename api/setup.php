@@ -5,41 +5,41 @@ require_once 'config.php';
 try {
     // Users table
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        dob TEXT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        dob DATE,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL
     )");
 
     // Vehicles table
     $pdo->exec("CREATE TABLE IF NOT EXISTS vehicles (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        make TEXT NOT NULL,
-        model TEXT NOT NULL,
-        year INTEGER NOT NULL,
-        license_plate TEXT UNIQUE NOT NULL,
-        status TEXT DEFAULT 'Active'
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        make VARCHAR(255) NOT NULL,
+        model VARCHAR(255) NOT NULL,
+        year INT NOT NULL,
+        license_plate VARCHAR(255) UNIQUE NOT NULL,
+        status VARCHAR(50) DEFAULT 'Active'
     )");
 
     // Drivers table
     $pdo->exec("CREATE TABLE IF NOT EXISTS drivers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        license_number TEXT UNIQUE NOT NULL,
-        phone TEXT,
-        status TEXT DEFAULT 'Available'
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        license_number VARCHAR(255) UNIQUE NOT NULL,
+        phone VARCHAR(50),
+        status VARCHAR(50) DEFAULT 'Available'
     )");
 
     // Trips table
     $pdo->exec("CREATE TABLE IF NOT EXISTS trips (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vehicle_id INTEGER,
-        driver_id INTEGER,
-        destination TEXT NOT NULL,
-        start_date TEXT NOT NULL,
-        end_date TEXT,
-        status TEXT DEFAULT 'Scheduled',
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        vehicle_id INT,
+        driver_id INT,
+        destination VARCHAR(255) NOT NULL,
+        start_date DATE NOT NULL,
+        end_date DATE,
+        status VARCHAR(50) DEFAULT 'Scheduled',
         FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
         FOREIGN KEY (driver_id) REFERENCES drivers(id)
     )");
