@@ -1,21 +1,17 @@
 <?php
 // api/config.php
 
-// Define database connection parameters for MySQL
-$host = '127.0.0.1';
-$db   = 'transport_db';
-$user = 'root'; // default XAMPP user
-$pass = '';     // default XAMPP password
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+// ── MySQL connection (XAMPP) ──────────────────────────────────────────────────
+define('DB_HOST', '127.0.0.1');
+define('DB_PORT', '3306');
+define('DB_NAME', 'transport_db');
+define('DB_USER', 'root');
+define('DB_PASS', '');          // XAMPP default: empty password
 
 try {
-    // Connect to MySQL database
-    $pdo = new PDO($dsn, $user, $pass);
-    // Set errormode to exceptions
+    $dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // Tell PDO to return result sets as associative arrays
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo json_encode(["status" => "error", "message" => "Connection failed: " . $e->getMessage()]);

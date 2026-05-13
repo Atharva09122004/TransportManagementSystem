@@ -26,6 +26,22 @@ switch ($method) {
         }
         break;
 
+    case 'PUT':
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (isset($data['id'], $data['make'], $data['model'], $data['year'], $data['license_plate'])) {
+            try {
+                $status = isset($data['status']) ? $data['status'] : 'Active';
+                $stmt = $pdo->prepare("UPDATE vehicles SET make = ?, model = ?, year = ?, license_plate = ?, status = ? WHERE id = ?");
+                $stmt->execute([$data['make'], $data['model'], $data['year'], $data['license_plate'], $status, $data['id']]);
+                sendJsonResponse(["status" => "success", "message" => "Vehicle updated successfully"]);
+            } catch (PDOException $e) {
+                sendJsonResponse(["status" => "error", "message" => "Error updating vehicle: " . $e->getMessage()], 400);
+            }
+        } else {
+            sendJsonResponse(["status" => "error", "message" => "Missing required fields"], 400);
+        }
+        break;
+
     case 'DELETE':
         $data = json_decode(file_get_contents('php://input'), true);
         if (isset($data['id'])) {

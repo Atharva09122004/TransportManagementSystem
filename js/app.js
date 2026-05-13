@@ -118,7 +118,7 @@ const app = {
                     <td>${trip.destination}</td>
                     <td>${trip.license_plate || 'N/A'}</td>
                     <td>${trip.driver_name || 'N/A'}</td>
-                    <td><span class="badge ${trip.status.toLowerCase()}">${trip.status}</span></td>
+                    <td><span class="badge ${trip.status.toLowerCase().replace(/ /g, '-')}">${trip.status}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -180,7 +180,7 @@ const app = {
             this.closeModal('vehicle-modal');
             this.loadVehicles();
         } else {
-            alert(res.message || 'Error occurred');
+            alert(res ? res.message : 'Error saving vehicle — check your connection.');
         }
     },
 
@@ -236,7 +236,7 @@ const app = {
             this.closeModal('driver-modal');
             this.loadDrivers();
         } else {
-            alert(res.message || 'Error occurred');
+            alert(res ? res.message : 'Error saving driver — check your connection.');
         }
     },
 
@@ -257,7 +257,7 @@ const app = {
                     <td>${t.license_plate || 'N/A'}</td>
                     <td>${t.driver_name || 'N/A'}</td>
                     <td>
-                        <select onchange="app.updateTripStatus(${t.id}, this.value)" class="status-dropdown ${t.status.toLowerCase().replace(' ', '-')}">
+                        <select onchange="app.updateTripStatus(${t.id}, this.value)" class="status-dropdown ${t.status.toLowerCase().replace(/ /g, '-')}">
                             <option value="Scheduled" ${t.status === 'Scheduled' ? 'selected' : ''}>Scheduled</option>
                             <option value="In Transit" ${t.status === 'In Transit' ? 'selected' : ''}>In Transit</option>
                             <option value="Completed" ${t.status === 'Completed' ? 'selected' : ''}>Completed</option>
@@ -300,8 +300,9 @@ const app = {
             e.target.reset();
             this.closeModal('trip-modal');
             this.loadTrips();
+            this.loadDashboard();
         } else {
-            alert(res.message || 'Error occurred');
+            alert(res ? res.message : 'Error scheduling trip — check your connection.');
         }
     },
 
@@ -309,9 +310,9 @@ const app = {
         const res = await api.put('trips.php', { id, status: newStatus });
         if (res && res.status === 'success') {
             this.loadTrips();
-            this.loadDashboard(); // Refresh background data
+            this.loadDashboard();
         } else {
-            alert(res.message || 'Error updating status');
+            alert(res ? res.message : 'Error updating status — check your connection.');
         }
     },
 
@@ -323,8 +324,9 @@ const app = {
             const res = await api.delete(endpoint, id);
             if (res && res.status === 'success') {
                 this.loadView(viewId);
+                if (viewId === 'trips') this.loadDashboard();
             } else {
-                alert(res.message || 'Error deleting record');
+                alert(res ? res.message : 'Error deleting record — check your connection.');
             }
         }
     }

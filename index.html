@@ -84,6 +84,10 @@
                     <label>Date of Birth</label>
                     <input type="date" id="auth-dob">
                 </div>
+                <div class="form-group hidden" id="fg-email">
+                    <label>Email Address</label>
+                    <input type="email" id="auth-email" placeholder="you@example.com">
+                </div>
                 <div class="form-group">
                     <label>Username</label>
                     <input type="text" id="auth-username" required placeholder="admin">
@@ -105,7 +109,7 @@
         // Check if already logged in
         window.onload = async () => {
             const res = await api.get('auth.php?action=check');
-            if(res && res.status === 'success') {
+            if (res && res.status === 'success') {
                 window.location.href = 'app.html';
             }
         };
@@ -113,6 +117,7 @@
         function openAuth(mode) {
             isLogin = mode === 'login';
             updateAuthUI();
+            document.getElementById('auth-form').reset();
             document.getElementById('auth-modal').classList.add('active');
         }
 
@@ -122,19 +127,23 @@
         }
 
         function updateAuthUI() {
-            if(isLogin) {
+            if (isLogin) {
                 document.getElementById('auth-title').innerText = 'Login';
                 document.getElementById('auth-submit').innerText = 'Login to Dashboard';
                 document.getElementById('fg-name').classList.add('hidden');
                 document.getElementById('fg-dob').classList.add('hidden');
+                document.getElementById('fg-email').classList.add('hidden');
                 document.getElementById('auth-name').removeAttribute('required');
+                document.getElementById('auth-email').removeAttribute('required');
                 document.querySelector('.toggle-form').innerHTML = `Don't have an account? <span>Sign Up</span>`;
             } else {
                 document.getElementById('auth-title').innerText = 'Create Account';
                 document.getElementById('auth-submit').innerText = 'Sign Up';
                 document.getElementById('fg-name').classList.remove('hidden');
                 document.getElementById('fg-dob').classList.remove('hidden');
+                document.getElementById('fg-email').classList.remove('hidden');
                 document.getElementById('auth-name').setAttribute('required', 'true');
+                document.getElementById('auth-email').setAttribute('required', 'true');
                 document.querySelector('.toggle-form').innerHTML = `Already have an account? <span>Login</span>`;
             }
         }
@@ -143,19 +152,24 @@
             e.preventDefault();
             const username = document.getElementById('auth-username').value;
             const password = document.getElementById('auth-password').value;
-            const name = document.getElementById('auth-name').value;
-            const dob = document.getElementById('auth-dob').value;
+            const name     = document.getElementById('auth-name').value;
+            const dob      = document.getElementById('auth-dob').value;
+            const email    = document.getElementById('auth-email').value;
 
             const action = isLogin ? 'login' : 'signup';
-            const data = isLogin ? {username, password} : {name, dob, username, password};
+            const data   = isLogin
+                ? { username, password }
+                : { name, dob, email, username, password };
 
             const res = await api.post(`auth.php?action=${action}`, data);
-            if(res && res.status === 'success') {
+            if (res && res.status === 'success') {
                 window.location.href = 'app.html';
             } else {
                 alert(res ? res.message : 'Error processing request');
             }
         }
+
+
     </script>
 </body>
 </html>

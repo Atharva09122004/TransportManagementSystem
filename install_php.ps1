@@ -6,7 +6,7 @@ Write-Host "Creating $phpDir..."
 New-Item -ItemType Directory -Force -Path $phpDir | Out-Null
 
 Write-Host "Downloading PHP..."
-$url = "https://windows.php.net/downloads/releases/php-8.3.17-nts-Win32-vs16-x64.zip"
+$url = "https://windows.php.net/downloads/releases/archives/php-8.3.3-nts-Win32-vs16-x64.zip"
 $zipPath = "$phpDir\php.zip"
 Invoke-WebRequest -Uri $url -OutFile $zipPath -UseBasicParsing
 

@@ -10,11 +10,12 @@ if (isset($_GET['action'])) {
     $action = $_GET['action'];
     if ($method === 'POST' && $action === 'signup') {
         if (isset($data['name'], $data['username'], $data['password'])) {
-            $dob = isset($data['dob']) ? $data['dob'] : null;
-            $hash = password_hash($data['password'], PASSWORD_DEFAULT);
+            $dob   = isset($data['dob'])   ? $data['dob']   : null;
+            $email = isset($data['email']) ? strtolower(trim($data['email'])) : null;
+            $hash  = password_hash($data['password'], PASSWORD_DEFAULT);
             try {
-                $stmt = $pdo->prepare("INSERT INTO users (name, dob, username, password) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$data['name'], $dob, $data['username'], $hash]);
+                $stmt = $pdo->prepare("INSERT INTO users (name, dob, username, password, email) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$data['name'], $dob, $data['username'], $hash, $email]);
                 $_SESSION['user_id'] = $pdo->lastInsertId();
                 $_SESSION['username'] = $data['username'];
                 $_SESSION['name'] = $data['name'];
@@ -22,6 +23,8 @@ if (isset($_GET['action'])) {
             } catch (PDOException $e) {
                 sendJsonResponse(["status" => "error", "message" => "Error: Username might be taken."], 400);
             }
+        } else {
+            sendJsonResponse(["status" => "error", "message" => "Name, username and password are required."], 400);
         }
     } else if ($method === 'POST' && $action === 'login') {
         if (isset($data['username'], $data['password'])) {
@@ -36,19 +39,27 @@ if (isset($_GET['action'])) {
             } else {
                 sendJsonResponse(["status" => "error", "message" => "Invalid credentials"], 401);
             }
+        } else {
+            sendJsonResponse(["status" => "error", "message" => "Username and password are required."], 400);
         }
     } else if ($method === 'POST' && $action === 'logout') {
         session_destroy();
         sendJsonResponse(["status" => "success"]);
     } else if ($method === 'GET' && $action === 'profile') {
-        if (!isset($_SESSION['user_id'])) sendJsonResponse(["status" => "error"], 401);
-        $stmt = $pdo->prepare("SELECT id, name, dob, username FROM users WHERE id = ?");
+        if (!isset($_SESSION['user_id']))
+            sendJsonResponse(["status" => "error"], 401);
+        $stmt = $pdo->prepare("SELECT id, name, dob, username, email FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         sendJsonResponse(["status" => "success", "data" => $stmt->fetch()]);
     } else if ($method === 'PUT' && $action === 'profile') {
-        if (!isset($_SESSION['user_id'])) sendJsonResponse(["status" => "error"], 401);
+        if (!isset($_SESSION['user_id']))
+            sendJsonResponse(["status" => "error"], 401);
+        if (!isset($data['name'])) {
+            sendJsonResponse(["status" => "error", "message" => "Name is required."], 400);
+        }
+        $dob = isset($data['dob']) ? $data['dob'] : null;
         $stmt = $pdo->prepare("UPDATE users SET name = ?, dob = ? WHERE id = ?");
-        $stmt->execute([$data['name'], $data['dob'], $_SESSION['user_id']]);
+        $stmt->execute([$data['name'], $dob, $_SESSION['user_id']]);
         if (!empty($data['password'])) {
             $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
             $stmt->execute([password_hash($data['password'], PASSWORD_DEFAULT), $_SESSION['user_id']]);

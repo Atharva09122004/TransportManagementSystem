@@ -5,61 +5,76 @@ require_once 'config.php';
 try {
     // Users table
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        dob DATE,
-        username VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL
-    )");
+        id       INT AUTO_INCREMENT PRIMARY KEY,
+        name     VARCHAR(255) NOT NULL,
+        dob      VARCHAR(20),
+        username VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email    VARCHAR(255)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Add email column if upgrading from old schema (MySQL safe)
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN email VARCHAR(255)");
+    } catch (PDOException $e) { /* column already exists — ignore */ }
+
+    // Password resets table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS password_resets (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        email      VARCHAR(255) NOT NULL,
+        token      VARCHAR(64) UNIQUE NOT NULL,
+        expires_at DATETIME NOT NULL,
+        used       TINYINT(1) DEFAULT 0
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     // Vehicles table
     $pdo->exec("CREATE TABLE IF NOT EXISTS vehicles (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        make VARCHAR(255) NOT NULL,
-        model VARCHAR(255) NOT NULL,
-        year INT NOT NULL,
-        license_plate VARCHAR(255) UNIQUE NOT NULL,
-        status VARCHAR(50) DEFAULT 'Active'
-    )");
+        id            INT AUTO_INCREMENT PRIMARY KEY,
+        make          VARCHAR(100) NOT NULL,
+        model         VARCHAR(100) NOT NULL,
+        year          INT NOT NULL,
+        license_plate VARCHAR(50) UNIQUE NOT NULL,
+        status        VARCHAR(50) DEFAULT 'Active'
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     // Drivers table
     $pdo->exec("CREATE TABLE IF NOT EXISTS drivers (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        license_number VARCHAR(255) UNIQUE NOT NULL,
-        phone VARCHAR(50),
-        status VARCHAR(50) DEFAULT 'Available'
-    )");
+        id             INT AUTO_INCREMENT PRIMARY KEY,
+        name           VARCHAR(255) NOT NULL,
+        license_number VARCHAR(100) UNIQUE NOT NULL,
+        phone          VARCHAR(50),
+        status         VARCHAR(50) DEFAULT 'Available'
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     // Trips table
     $pdo->exec("CREATE TABLE IF NOT EXISTS trips (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        vehicle_id INT,
-        driver_id INT,
+        id          INT AUTO_INCREMENT PRIMARY KEY,
+        vehicle_id  INT,
+        driver_id   INT,
         destination VARCHAR(255) NOT NULL,
-        start_date DATE NOT NULL,
-        end_date DATE,
-        status VARCHAR(50) DEFAULT 'Scheduled',
-        FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
-        FOREIGN KEY (driver_id) REFERENCES drivers(id)
-    )");
+        start_date  VARCHAR(20) NOT NULL,
+        end_date    VARCHAR(20),
+        status      VARCHAR(50) DEFAULT 'Scheduled',
+        FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE SET NULL,
+        FOREIGN KEY (driver_id)  REFERENCES drivers(id)  ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-    // Optional: insert some dummy data if empty
+    // Insert demo data if vehicles table is empty
     $stmt = $pdo->query("SELECT COUNT(*) FROM vehicles");
     if ($stmt->fetchColumn() == 0) {
-        $pdo->exec("INSERT INTO vehicles (make, model, year, license_plate, status) VALUES 
+        $pdo->exec("INSERT INTO vehicles (make, model, year, license_plate, status) VALUES
             ('Volvo', 'FH16', 2022, 'TRK-001', 'Active'),
             ('Mercedes-Benz', 'Actros', 2021, 'TRK-002', 'Active')");
 
-        $pdo->exec("INSERT INTO drivers (name, license_number, phone, status) VALUES 
+        $pdo->exec("INSERT INTO drivers (name, license_number, phone, status) VALUES
             ('Jaimil Patel', 'DL-1001', '+1234567890', 'Available'),
             ('Atharva Gholap', 'DL-1002', '+0987654321', 'Available')");
 
-        $pdo->exec("INSERT INTO trips (vehicle_id, driver_id, destination, start_date, status) VALUES 
+        $pdo->exec("INSERT INTO trips (vehicle_id, driver_id, destination, start_date, status) VALUES
             (1, 1, 'New York City', '2026-04-20', 'Scheduled')");
     }
 
-    sendJsonResponse(["status" => "success", "message" => "Database setup complete."]);
+    sendJsonResponse(["status" => "success", "message" => "Database setup complete (MySQL)."]);
 
 } catch (PDOException $e) {
     sendJsonResponse(["status" => "error", "message" => $e->getMessage()], 500);
